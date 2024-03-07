@@ -1,10 +1,11 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { removeUser } from './slices/authSlice';
+
 import AppRouter from './router';
 
 function App() {
   const user = useSelector((state) => state.auth.user);
+  const token = localStorage.getItem("token");
   const dispatch = useDispatch();
 
   const handleLogout = () => {
@@ -14,7 +15,6 @@ function App() {
 
   return (
     <>
-      {user && <button onClick={handleLogout}>Déconnexion</button>}
       <AppRouter />
     </>
   );

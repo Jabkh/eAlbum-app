@@ -4,11 +4,6 @@ import axios from "axios";
 
 export const fetchAlbums = createAsyncThunk("albums/fetchAlbums", async () => {
   try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      throw new Error("No token found");
-    }
-
     const response = await axios.get(`${BASE_DB_URL}/albums.json`);
     const albums = [];
 

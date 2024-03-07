@@ -1,16 +1,25 @@
 import { useDispatch, useSelector } from "react-redux";
-import { setAuthMode, setUser } from "../../slices/authSlice";
-import { useRef } from "react";
-import { SIGN_IN_URL, SIGN_UP_URL } from "../../config/firebaseConfig";
-import axios from "axios";
+import { setAuthMode } from "../../slices/authSlice";
+import { useRef, useEffect } from "react"; // Import de useEffect
 import { Form, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import { authenticateUser } from "../../slices/authSlice";
 
 const SignForm = () => {
     const authMode = useSelector(state => state.auth.authMode);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const token = localStorage.getItem("token"); // Vérifier si un jeton est déjà présent
 
     const emailRef = useRef();
     const passwordRef = useRef();
+
+    useEffect(() => {
+        // Vérifier si un jeton est déjà présent et rediriger vers /albums
+        if (token) {
+            navigate("/albums");
+        }
+    }, []); // Utilisation de useEffect avec une dépendance vide pour simuler le montage du composant
 
     const submitFormHandler = async (event) => {
         event.preventDefault();
@@ -18,18 +27,9 @@ const SignForm = () => {
         const email = emailRef.current.value;
         const password = passwordRef.current.value;
 
-        const credentials = {
-            email,
-            password,
-            returnSecureToken: true
-        };
-
-        const URL = authMode === "Se connecter" ? SIGN_IN_URL : SIGN_UP_URL;
-
-        axios.post(URL, credentials).then(response => {
-            localStorage.setItem("token", response.data.idToken);
-            dispatch(setUser(response.data));
-            dispatch(setAuthMode(""));
+        // Dispatch de l'action authenticateUser avec les informations d'authentification
+        dispatch(authenticateUser({ email, password, authMode })).then(() => {
+            navigate("/albums"); // Redirection vers "/albums" après authentification réussie
         });
     };
 

@@ -2,36 +2,19 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Card, Button, Container, Row, Col, Form } from 'react-bootstrap';
 import AlbumItem from "./AlbumItem";
-import { BASE_DB_URL } from "../../config/firebaseConfig";
 import { useSelector, useDispatch } from 'react-redux';
-import { resetChangeFlag } from '../../slices/albumsSlice';
+import { resetChangeFlag, fetchAlbums } from '../../slices/albumsSlice'; // Import de fetchAlbums
 
 const AlbumList = () => {
-  const [albums, setAlbums] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortCriteria, setSortCriteria] = useState('title'); // Critère de tri par défaut : titre
+  const [triParCritere, setTriParCritere] = useState('title'); // Critère de tri par défaut : titre
   const hasChanged = useSelector(state => state.albums.hasChanged);
+  const albums = useSelector(state => state.albums.albums); // Utilisation de la liste d'albums depuis le store
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const fetchAlbums = async () => {
-      try {
-        const response = await axios.get(`${BASE_DB_URL}albums.json`);
-        const data = response.data;
-        if (data) {
-          const fetchedAlbums = Object.keys(data).map((key) => ({
-            id: key,
-            ...data[key],
-          }));
-          setAlbums(fetchedAlbums);
-        }
-        dispatch(resetChangeFlag());
-      } catch (error) {
-        console.error("Error fetching albums:", error);
-      }
-    };
-
-    fetchAlbums();
+    // Appel de fetchAlbums au lieu de faire la requête directement
+    dispatch(fetchAlbums());
   }, [hasChanged, dispatch]);
 
   const filteredAlbums = albums.filter(album =>
@@ -39,8 +22,8 @@ const AlbumList = () => {
   );
 
   // Fonction de tri des albums en fonction du critère sélectionné
-  const sortAlbums = (criteria) => {
-    switch (criteria) {
+  const sortAlbums = (critere) => {
+    switch (critere) {
       case 'title':
         return [...filteredAlbums].sort((a, b) => a.title.localeCompare(b.title));
       case 'score':
@@ -52,7 +35,7 @@ const AlbumList = () => {
   };
 
   // Appel de la fonction de tri pour obtenir les albums triés
-  const sortedAlbums = sortAlbums(sortCriteria);
+  const sortedAlbums = sortAlbums(triParCritere);
 
   return (
     <Container>
@@ -64,8 +47,8 @@ const AlbumList = () => {
       />
       {/* Ajout d'un select pour choisir le critère de tri */}
       <Form.Select
-        value={sortCriteria}
-        onChange={(e) => setSortCriteria(e.target.value)}
+        value={triParCritere}
+        onChange={(e) => setTriParCritere(e.target.value)}
         className="mb-3"
       >
         <option value="title">Titre</option>
